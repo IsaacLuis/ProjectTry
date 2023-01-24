@@ -5,7 +5,7 @@ const button = document.getElementById("start-button")
 
 // canvas H 750 * W 750
 
-const scale = 25;
+const scale = 30;
 let snakeHeadX  = 10  //  scale * 5;
 let snakeHeadY = 10   //  scale * 5; 
 
@@ -35,11 +35,13 @@ const playerSnake = {
         ctx.fill();
 
     snakeBody.push(this.x, this.y);
+    
     ctx.arc(this.x+scale/2, this.y+scale/2, scale/2, 0, 2 * Math.PI);
-    if (snakeBody.length > 3) {
-      console.log(snakeBody)
-      let itemToRemove = snakeBody.shift();
-      ctx.clearRect(itemToRemove[0], itemToRemove[1], scale, scale);
+    if (snakeBody.length > 4) {
+      
+      //let itemToRemove = snakeBody.shift();
+      
+      ctx.clearRect(snakeBody.shift(), snakeBody.shift(), scale, scale);
       }
   },
 
