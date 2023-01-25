@@ -20,7 +20,7 @@ const startingY = canvas.height - 125
 let animationId;
 
 let snakeBody = []; 
-let snakeGrow = 2;
+let snakeGrow = 6;
 let speed = 1;
 let goingUp ;
 let goingDown ;
@@ -143,7 +143,7 @@ function checkCollision() {
 
   console.log("Headx" + playerSnake.x)
         console.log("HeadY" + snakeHeadY)
-  for (let i = 0; i < snakeBody.length ; i++) {
+  for (let i = 0; i < snakeBody.length  ; i++) {
     
       if (playerSnake.x == snakeBody[i] && playerSnake.y == snakeBody[i]) {
         
