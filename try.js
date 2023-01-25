@@ -18,7 +18,12 @@ let grid = 20;
 const startingX = canvas.width/2 - 25
 const startingY = canvas.height - 125
 let animationId;
+let generateFoodId;
 
+let foodArray = []
+
+
+let foodX , foodY ;
 let snakeBody = []; 
 let snakeGrow = 6;
 let speed = 1;
@@ -29,6 +34,9 @@ let goingLeft;
 
 let GameOn = true;
 
+var blockSize = 30;
+var total_row = 27; //total row number         //heigt
+var total_col = 27; 
 
 let directionVar;
    
@@ -120,20 +128,49 @@ const playerSnake = {
 
 function headS() {
 
+  ctx.clearRect(0,0,750,750)
+
   ctx.beginPath();
   ctx.arc(playerSnake.x+scale/2, playerSnake.y+scale/2, scale/2, 0, 2 * Math.PI);
   ctx.fillStyle = "green";
   ctx.fill();
 
-snakeBody.push(playerSnake.x, playerSnake.y);
+  snakeBody.push({x: playerSnake.x, y: playerSnake.y})
 //ctx.arc(playerSnake.x+scale/2, playerSnake.y+scale/2, scale/2, 0, 2 * Math.PI);
 
 
   if (snakeBody.length > snakeGrow) {
-      ctx.clearRect(snakeBody.shift(), snakeBody.shift(), scale, scale);  
+      //ctx.clearRect(snakeBody.shift(), snakeBody.shift(), scale, scale);  
+      snakeBody.shift()
     }
+    console.log("snake body", snakeBody)
     checkCollision() 
-}
+    if(playerSnake.x === foodX && playerSnake.y === foodY) {
+        console.log("Eating")
+    }
+
+    for (let i = 0; i < snakeBody.length; i++) {
+      ctx.beginPath();
+      ctx.arc(snakeBody[i].x+scale/2, snakeBody[i].y+scale/2, scale/2, 0, 2 * Math.PI);
+      ctx.fillStyle = "green";
+      ctx.fill();
+  }
+  
+
+    for(let i = 0; i < foodArray.length; i++)
+      {
+        foodArray[i].draw()
+        foodCollision(foodArray[i], i) 
+
+      }
+  }
+
+
+  function generateFood() {
+    generateFoodId = setInterval(() => {
+      foodArray.push(new Food());
+     }, 2000);
+   }
 
 function checkCollision() {
   let tailCollision=false, 
@@ -141,21 +178,19 @@ function checkCollision() {
   boundaryCollision=false;
   //with its own tail
 
-  console.log("Headx" + playerSnake.x)
-        console.log("HeadY" + snakeHeadY)
   for (let i = 0; i < snakeBody.length  ; i++) {
     
       if (playerSnake.x == snakeBody[i] && playerSnake.y == snakeBody[i]) {
         
           tailCollision=true;
-          console.log("Body")
+        //  console.log("Body")
       }
   }
   //with boundaries
   if(playerSnake.x >= canvas.width || playerSnake.x < 0 || playerSnake.y >= canvas.height || playerSnake.y < 0)
   {
       boundaryCollision=true;
-      console.log("Bounds")
+//      console.log("Bounds")
   }
   //with virus
  /* if(snakeHeadX===virusX && snakeHeadY===virusY) {
@@ -164,7 +199,20 @@ function checkCollision() {
   */
   return (tailCollision || boundaryCollision);    //*return (tailCollision || boundaryCollision || virusCollision);
 }
+function foodCollision (object, i) {
+    
+  if (
+      playerSnake.x > object.x
+      && playerSnake.x < object.x + object.width
+      && playerSnake.y > object.y
+      && playerSnake.y < object.y + object.height
+      ) {
+        snakeGrow++
+      console.log("Eating")
+      foodArray.splice(i,1)
+  }
 
+}
 
 function changeDirection() {
   
@@ -211,6 +259,43 @@ function changeDirection() {
           break;
   }
 }
+
+class Food {
+  constructor() {
+    this.x =  Math.floor(Math.random() * total_col) * blockSize;
+    this.y = Math.floor(Math.random() * total_row) * blockSize;
+    this.width = 75;
+    this.height = 75;
+  }
+
+  draw() {
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(this.x, this.y, 15, 15);
+  }
+  
+}
+
+
+
+
+
+
+
+
+
+
+function placeFood() {
+ 
+  // in x coordinates.
+  foodX = Math.floor(Math.random() * total_col) * blockSize;
+   
+  //in y coordinates.
+  foodY = Math.floor(Math.random() * total_row) * blockSize; 
+
+  ctx.fillStyle = "yellow";
+  ctx.fillRect(foodX, foodY, scale, scale);
+}
+
 
 function moveSnakeForward() {
   tail0=tail[0];
@@ -260,6 +345,7 @@ function startGame() {
   
     speedX = scale * speed;
     speedY = 0;
+generateFood()
 
 }
   
