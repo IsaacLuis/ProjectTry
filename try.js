@@ -5,50 +5,56 @@ const button = document.getElementById("start-button")
 
 // canvas H 750 * W 750
 
-const scale = 30;
-let snakeHeadX  = 10  //  scale * 5;
-let snakeHeadY = 10   //  scale * 5; 
+const scale = 15;
+let snakeHeadX  = 25  //  scale * 5;
+let snakeHeadY = 25   //  scale * 5; 
 
 let tail, tailX, tailR, tailY;
 let speedX, speedY;
 let tail0;
 let direction;
+let directionPrev;
 let grid = 20;
 const startingX = canvas.width/2 - 25
 const startingY = canvas.height - 125
 let animationId;
 
 let snakeBody = []; 
+let snakeGrow = 2;
+let speed = 1;
+let goingUp ;
+let goingDown ;
+let goingRight  ;
+let goingLeft;
+
+let GameOn = true;
+
+
+let directionVar;
+   
+    let previousDir;
 
 const playerSnake = {
 
   x: snakeHeadX,
   y: snakeHeadY,
+  playerSpeedX: speedX,
+  playerSpeedY:speedY,
+  //angle:  0,
   
   //width: 50,
   //height: 100,
   draw: function() {
   
-        ctx.beginPath();
-        ctx.arc(this.x+scale/2, this.y+scale/2, scale/2, 0, 2 * Math.PI);
-        ctx.fillStyle = "green";
-        ctx.fill();
-
-    snakeBody.push(this.x, this.y);
-    
-    ctx.arc(this.x+scale/2, this.y+scale/2, scale/2, 0, 2 * Math.PI);
-    if (snakeBody.length > 4) {
-      
-      //let itemToRemove = snakeBody.shift();
-      
-      ctx.clearRect(snakeBody.shift(), snakeBody.shift(), scale, scale);
-      }
+    headS()
+          
+           
   },
 
   moveLeft: function() {
+   
     this.x = this.x - 15
-    
-    
+   
     ctx.beginPath();
     ctx.arc(this.x+(scale/5), this.y+(scale/5), scale/8, 0, 2 * Math.PI);
     ctx.arc(this.x+(scale/5), this.y+scale-(scale/5), scale/8, 0, 2 * Math.PI);
@@ -58,20 +64,21 @@ const playerSnake = {
 
   moveRight: function() {
   
-
     this.x = this.x + 15
-    
+  
+
     ctx.beginPath();
     ctx.arc(this.x+scale-(scale/5), this.y+(scale/5), scale/8, 0, 2 * Math.PI);
     ctx.arc(this.x+scale-(scale/5), this.y+scale-(scale/5), scale/8, 0, 2 * Math.PI);
     ctx.fillStyle = "pink";
     ctx.fill();
-    
-
-    
+   
   },
 
   moveUp: function() {
+
+    
+
     this.y = this.y - 15
     
     ctx.beginPath();
@@ -84,6 +91,8 @@ const playerSnake = {
   },
 
   moveDown: function() {
+
+   
     
     this.y = this.y + 15
     ctx.beginPath();
@@ -91,19 +100,130 @@ const playerSnake = {
     ctx.arc(this.x+scale-(scale/5), this.y+scale-(scale/5), scale/8, 0, 2 * Math.PI);
     ctx.fillStyle = "orange";
     ctx.fill();
-      // fruit
-    
-       
+        
   }
     
 
   }
   
+/*
+  window.addEventListener("keydown", pressedKey);
+
+  function pressedKey() {
+      
+          previousDir = direction;
+          directionVar = event.key.replace("Arrow", "");
+          changeDirection();
+      }
+  
+*/  
+
+function headS() {
+
+  ctx.beginPath();
+  ctx.arc(playerSnake.x+scale/2, playerSnake.y+scale/2, scale/2, 0, 2 * Math.PI);
+  ctx.fillStyle = "green";
+  ctx.fill();
+
+snakeBody.push(playerSnake.x, playerSnake.y);
+//ctx.arc(playerSnake.x+scale/2, playerSnake.y+scale/2, scale/2, 0, 2 * Math.PI);
 
 
+  if (snakeBody.length > snakeGrow) {
+      ctx.clearRect(snakeBody.shift(), snakeBody.shift(), scale, scale);  
+    }
+    checkCollision() 
+}
+
+function checkCollision() {
+  let tailCollision=false, 
+  //virusCollision=false;
+  boundaryCollision=false;
+  //with its own tail
+
+  console.log("Headx" + playerSnake.x)
+        console.log("HeadY" + snakeHeadY)
+  for (let i = 0; i < snakeBody.length ; i++) {
+    
+      if (playerSnake.x == snakeBody[i] && playerSnake.y == snakeBody[i]) {
+        
+          tailCollision=true;
+          console.log("Body")
+      }
+  }
+  //with boundaries
+  if(playerSnake.x >= canvas.width || playerSnake.x < 0 || playerSnake.y >= canvas.height || playerSnake.y < 0)
+  {
+      boundaryCollision=true;
+      console.log("Bounds")
+  }
+  //with virus
+ /* if(snakeHeadX===virusX && snakeHeadY===virusY) {
+      virusCollision=true;
+  }
+  */
+  return (tailCollision || boundaryCollision);    //*return (tailCollision || boundaryCollision || virusCollision);
+}
 
 
+function changeDirection() {
+  
+  switch (directionVar) {
+      case "Up":
+          //move "up" only when previous direction is not "down"
+        
+          if (previousDir !== "Down") {
+              direction=directionVar;
+              speedX = 0;
+              speedY = scale * -speed;
+              
+          } 
+          break;
 
+      case "Down":
+          //move "down" only when previous direction is not "up"
+          if (previousDir !== "Up") {
+              direction=directionVar;
+              speedX = 0;
+              speedY = scale * speed;
+          } 
+          break;
+
+      case "Left":
+          //move "left" only when previous direction is not "right"
+          if (previousDir !== "Right") {
+              direction=directionVar;
+              speedX = scale * -speed;
+              speedY = 0;
+          } 
+          break;
+
+      case "Right":
+          //move "right" only when previous direction is not "left"
+          console.log(speedX+ " " + speedY)
+          if (previousDir !== "Left") {
+              direction=directionVar;
+              speedX = scale * speed;
+              speedY = 0;
+
+              console.log(speedX+ " " + speedY)
+          } 
+          break;
+  }
+}
+
+function moveSnakeForward() {
+  tail0=tail[0];
+  for (let i = 0; i < tail.length - 1; i++) {
+      tail[i] = tail[i + 1];
+  }
+  tail[totalTail - 1] = { tailX: snakeHeadX, tailY: snakeHeadY };
+  snakeHeadX += speedX;
+  snakeHeadY += speedY;
+}
+
+
+/*
 
 function drawSnakeTail() {
   let tailR = scale/4;
@@ -115,6 +235,11 @@ function drawSnakeTail() {
           ctx.fill();
       }
 }
+*/
+
+
+
+
 
 function startGame() {
 
@@ -129,22 +254,22 @@ function startGame() {
   canvas.style.visibility = "visible"
   
   
+  directionVar = "Right";
+    direction = "Right";
+    previousDir = "Right";
   
+    speedX = scale * speed;
+    speedY = 0;
+
 }
   
-
-
-
-
-
-
-
   window.onload = function() {
    
     document.getElementById("start-button").onclick = function() {
       
       startGame()
-       
+    // checkCollision() 
+      //moveSnakeForward()
       
           
     }
@@ -152,17 +277,22 @@ function startGame() {
       playerSnake.draw();
       switch (e.keyCode) {
         case 38:
+          //changeDirection("Up")
           playerSnake.moveUp();
           break;
         case 40:
+          //changeDirection("Down")
           playerSnake.moveDown();
           
           break;
         case 37:
+          //changeDirection("Left")
           playerSnake.moveLeft();
           break;
         case 39:
-          playerSnake.moveRight();
+          //changeDirection("Right")
+          
+         playerSnake.moveRight();
           break;
       }
   
